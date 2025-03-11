@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<head>
+    Website
+</head>
+<body>
+    <p>Get request example: Hello World!</p>
+    <button onclick="getHelloWorld()">GET</button>
+
+    <p>Get request example: User info by ID</p>
+    <p>User ID:</p><input type="number" id="userID" name="userID" required>
+    <button onclick="getUserInfo()">GET User Info</button>
+
+    <p>Post request example: Add user</p>
+    <form id="Form">
+        <label for="userName">User Name:</label>
+        <input type="text" id="userName" name="userName" required>
+        <br>
+        <label for="email">email:</label>
+        <input type="text" id="email" name="email" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="text" id="password" name="password" required>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <script>
+        function getHelloWorld() {
+            fetch("http://localhost:8000/")
+                .then(response => response.json())
+                .then(data => console.log("GET data: ", data));
+        }
+
+        function getUserInfo() {
+            console.log("http://localhost:8000/users/");
+            const userID = document.getElementById("userID").value;
+            fetch(`http://localhost:8000/users/${userID}`)
+                .then(response => response.json())
+                .then(data => console.log("User Info: ", data));
+        }
+
+        document.getElementById("Form").addEventListener("submit",
+            function(event) {
+                event.preventDefault(); //prevent submiting default values
+
+                const userName = document.getElementById("userName").value;
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+
+                fetch("http://localhost:8000/addUser", {
+                    method: "POST",
+                    headers: {
+                        "accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: userName,
+                        email: email,
+                        password: password 
+                    })
+                })
+                .then(response => response.json())
+                .then(data => console.log("Added user: ", data))
+                .catch(error => console.error("Error adding user", error));
+            });
+    </script>
+</body>
