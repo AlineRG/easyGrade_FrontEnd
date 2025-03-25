@@ -1,67 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyGrade</title>
+    <title>EasyGrade - Registro e Inicio de Sesión</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <header>
-        <div>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-    
-    <div class="main-container">
-        <main>
-            <div class="container mt-4">
+    <div class="container mt-5">
+        <h2>Iniciar sesión</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" class="form-control" id="loginEmail" required>
             </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" class="form-control" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn btn-dark btn-block">Iniciar sesión</button>
+        </form>
+        <div id="loginMessage" class="mt-3"></div>
 
-            <div>
-                <h2>Iniciar sesión</h2>
-                <form method="POST" action="login.html">
-                    <div class="form-group">
-                        <label class="form-label">Correo electrónico</label>
-                        <input type="email" class="form-control" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-dark btn-block">Iniciar sesión</button>
-                </form>
+        <h2 class="mt-4">Registrar usuario</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>ID de usuario</label>
+                <input type="number" class="form-control" id="registerUserId" required>
             </div>
-            
-            <div class="form-container mt-4">
-                <h2>Registrar usuario</h2>
-                <form method="POST" action="register.html">
-                    <div class="form-group">
-                        <label class="form-label">Nombre de usuario</label>
-                        <input type="text" class="form-control" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Correo electrónico</label>
-                        <input type="email" class="form-control" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-dark btn-block">Registrar</button>
-                </form>
+            <div class="form-group">
+                <label>Nombre de usuario</label>
+                <input type="text" class="form-control" id="registerUsername" required>
             </div>
-        </main>
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" class="form-control" id="registerEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" class="form-control" id="registerPassword" required>
+            </div>
+            <button type="submit" class="btn btn-dark btn-block">Registrar</button>
+        </form>
+        <div id="registerMessage" class="mt-3"></div>
     </div>
 
-    <!-- JS de Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const API_URL = "http://127.0.0.1:8000"; // URL del backend FastAPI
+
+        // Registrar usuario
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const userId = parseInt(document.getElementById("registerUserId").value);
+            const username = document.getElementById("registerUsername").value;
+            const email = document.getElementById("registerEmail").value;
+            const password = document.getElementById("registerPassword").value;
+
+            fetch(`${API_URL}/addUser`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ USER_ID: userId, USERNAME: username, EMAIL: email, PASSWORD: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById("registerMessage");
+                if (data.USERNAME) {
+                    messageDiv.innerHTML = `<div class="alert alert-success">Usuario registrado con éxito.</div>`;
+                    document.getElementById("registerForm").reset();
+                } else if (Array.isArray(data.detail)) {
+                    const errors = data.detail.map(e => `${e.loc.join(" → ")}: ${e.msg}`).join("<br>");
+                    messageDiv.innerHTML = `<div class="alert alert-danger">Error al registrar:<br>${errors}</div>`;
+                } else {
+                    messageDiv.innerHTML = `<div class="alert alert-danger">Error al registrar: ${data.detail || "Intenta nuevamente."}</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("registerMessage").innerHTML = `<div class="alert alert-danger">Error en la conexión con el servidor.</div>`;
+                console.error("Error:", error);
+            });
+        });
+
+        // Iniciar sesión
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+
+            fetch(`${API_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById("loginMessage");
+                if (data.USERNAME) {
+                    localStorage.setItem("userData", JSON.stringify(data)); // ✅ Guardar datos reales del usuario
+                    messageDiv.innerHTML = `<div class="alert alert-success">Inicio de sesión exitoso. Redirigiendo...</div>`;
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.detail || "Correo o contraseña incorrectos."}</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("loginMessage").innerHTML = `<div class="alert alert-danger">Error en la conexión con el servidor.</div>`;
+                console.error("Error:", error);
+            });
+        });
+    </script>
 </body>
 </html>
