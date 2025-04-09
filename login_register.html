@@ -97,7 +97,7 @@
             .then(data => {
                 const messageDiv = document.getElementById("loginMessage");
                 if (data.USERNAME) {
-                    localStorage.setItem("userData", JSON.stringify(data)); // ✅ Guardar datos reales del usuario
+                    localStorage.setItem("userData", JSON.stringify(data)); //Guardar datos reales del usuario
                     messageDiv.innerHTML = `<div class="alert alert-success">Inicio de sesión exitoso. Redirigiendo...</div>`;
                     setTimeout(() => {
                         window.location.href = "index.html";
