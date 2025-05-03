@@ -25,10 +25,6 @@
         <h2 class="mt-4">Registrar usuario</h2>
         <form id="registerForm">
             <div class="form-group">
-                <label>ID de usuario</label>
-                <input type="number" class="form-control" id="registerUserId" required>
-            </div>
-            <div class="form-group">
                 <label>Nombre de usuario</label>
                 <input type="text" class="form-control" id="registerUsername" required>
             </div>
@@ -52,7 +48,6 @@
         document.getElementById("registerForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
-            const userId = parseInt(document.getElementById("registerUserId").value);
             const username = document.getElementById("registerUsername").value;
             const email = document.getElementById("registerEmail").value;
             const password = document.getElementById("registerPassword").value;
@@ -60,7 +55,7 @@
             fetch(`${API_URL}/addUser`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ USER_ID: userId, USERNAME: username, EMAIL: email, PASSWORD: password })
+                body: JSON.stringify({USERNAME: username, EMAIL: email, PASSWORD: password })
             })
             .then(response => response.json())
             .then(data => {
