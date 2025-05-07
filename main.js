@@ -1,3 +1,6 @@
+// Carga principal y evento DOMContentLoaded
+import { showProfile } from './profile.js';
+
 document.addEventListener("DOMContentLoaded", function () {
   const contentBox = document.querySelector(".content-box");
   let contactoData = null;
