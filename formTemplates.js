@@ -6,8 +6,6 @@ export function generateProfileForm(userData) {
       <div><label class="block font-semibold">Nombre de Usuario:</label><input type="text" id="editUsername" value="${userData.USERNAME}" class="w-full p-2 border rounded" disabled></div>
       <div><label class="block font-semibold">Nombre(s):</label><input type="text" id="editNombreS" class="w-full p-2 border rounded" disabled></div>
       <div><label class="block font-semibold">Apellido(s):</label><input type="text" id="editApellidoS" class="w-full p-2 border rounded" disabled></div>
-      <div><label class="block font-semibold">Email:</label><input type="email" id="editEmail" value="${userData.EMAIL}" class="w-full p-2 border rounded" disabled></div>
-      <div><label class="block font-semibold">Contraseña:</label><input type="password" id="editPassword" value="${userData.PASSWORD}" class="w-full p-2 border rounded" disabled></div>
       <div><label class="block font-semibold">Teléfono:</label><input type="text" id="editTelefono" class="w-full p-2 border rounded" disabled></div>
       <div><label class="block font-semibold">Lada País:</label><input type="number" id="editLadaPais" class="w-full p-2 border rounded" disabled></div>
       <div><label class="block font-semibold">Lada Local:</label><input type="number" id="editLadaLocal" class="w-full p-2 border rounded" disabled></div>

@@ -7,8 +7,6 @@ export function handleFormSubmit(userData, contactoData) {
   const updatedUser = {
     USER_ID: userData.USER_ID,
     USERNAME: document.getElementById("editUsername").value,
-    EMAIL: document.getElementById("editEmail").value,
-    PASSWORD: document.getElementById("editPassword").value
   };
 
   const updatedContact = {
