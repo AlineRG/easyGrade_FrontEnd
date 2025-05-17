@@ -7,8 +7,6 @@ export function handleFormSubmit(userData, contactoData) {
   const updatedUser = {
     USER_ID: userData.USER_ID,
     USERNAME: document.getElementById("editUsername").value,
-    EMAIL: document.getElementById("editEmail").value,
-    PASSWORD: document.getElementById("editPassword").value
   };
 
   const updatedContact = {
@@ -31,14 +29,14 @@ export function handleFormSubmit(userData, contactoData) {
   };
 
   fetch("http://127.0.0.1:8000/updateUser", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedUser)
   }).then(res => res.json())
     .then(data => localStorage.setItem("userData", JSON.stringify(data)));
 
   fetch("http://127.0.0.1:8000/updateContact", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedContact)
   })

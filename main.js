@@ -1,5 +1,6 @@
 // Carga principal y evento DOMContentLoaded
 import { showProfile } from './profile.js';
+import { showPrivacidad } from './privacidad.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   const contentBox = document.querySelector(".content-box");
@@ -8,6 +9,11 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("link-profile").addEventListener("click", function (event) {
       event.preventDefault();
       showProfile(contentBox);
+  });
+
+  document.getElementById("link-privacidad").addEventListener("click", function (event) {
+    event.preventDefault();
+    showPrivacidad(contentBox);
   });
 
   window.logout = function () {
