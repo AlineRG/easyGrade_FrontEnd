@@ -29,14 +29,14 @@ export function handleFormSubmit(userData, contactoData) {
   };
 
   fetch("http://127.0.0.1:8000/updateUser", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedUser)
   }).then(res => res.json())
     .then(data => localStorage.setItem("userData", JSON.stringify(data)));
 
   fetch("http://127.0.0.1:8000/updateContact", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedContact)
   })
