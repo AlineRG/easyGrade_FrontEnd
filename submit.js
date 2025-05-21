@@ -6,9 +6,8 @@ export function handleFormSubmit(userData, contactoData) {
 
   const updatedUser = {
     USER_ID: userData.USER_ID,
-    USERNAME: document.getElementById("editUsername").value,
-    EMAIL: document.getElementById("editEmail").value,
-    PASSWORD: document.getElementById("editPassword").value
+    USERNAME: document.getElementById("editUsername").value
+    // Ya no incluimos EMAIL ni PASSWORD aquí
   };
 
   const updatedContact = {
@@ -31,14 +30,19 @@ export function handleFormSubmit(userData, contactoData) {
   };
 
   fetch("http://127.0.0.1:8000/updateUser", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedUser)
   }).then(res => res.json())
-    .then(data => localStorage.setItem("userData", JSON.stringify(data)));
+    .then(data => {
+      // Solo actualizamos el USERNAME en localStorage
+      const stored = JSON.parse(localStorage.getItem("userData")) || {};
+      stored.USERNAME = data.USERNAME;
+      localStorage.setItem("userData", JSON.stringify(stored));
+    });
 
   fetch("http://127.0.0.1:8000/updateContact", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedContact)
   })
@@ -53,4 +57,3 @@ export function handleFormSubmit(userData, contactoData) {
       document.getElementById("editMessage").innerHTML = `<p class="text-red-600">Error al actualizar el perfil</p>`;
     });
 }
-
