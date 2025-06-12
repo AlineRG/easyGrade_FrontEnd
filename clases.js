@@ -63,4 +63,3 @@ function renderMateriasForm(contentBox, materias) {
         .catch(error => console.error("Error al agregar materia:", error));
     });
 }
-

@@ -1,6 +1,6 @@
 import { showProfile } from './profile.js';
 import { showPrivacy } from './privacy.js';
-import { showClases } from './clases.js';
+import { showMaterias } from './clases.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   const contentBox = document.querySelector(".content-box");
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.getElementById("link-misClases").addEventListener("click", function (event) {
     event.preventDefault();
-    showClases(contentBox);
+    showMaterias(contentBox);
   });
 
   window.logout = function () {
