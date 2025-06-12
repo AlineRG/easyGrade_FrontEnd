@@ -5,17 +5,6 @@ export function showMaterias(contentBox) {
         return;
     }
 
-    // Cargar materias desde el backend
-    fetch(`http://127.0.0.1:8000/materias/${userData.USER_ID}`)
-        .then(response => response.json())
-        .then(materias => renderMateriasForm(contentBox, materias))
-        .catch(error => {
-            console.error("Error cargando materias:", error);
-            renderMateriasForm(contentBox, []);
-        });
-}
-
-function renderMateriasForm(contentBox, materias) {
     contentBox.innerHTML = `
         <h2 class="text-xl font-semibold mb-4">Mis Materias</h2>
         <form id="formMateria" class="space-y-4 mb-6">
@@ -33,9 +22,7 @@ function renderMateriasForm(contentBox, materias) {
             </div>
             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Agregar Materia</button>
         </form>
-        <div id="listaMaterias">
-            ${materias.map(m => `<p class="mb-2">📘 [ID: ${m.MATERIA_ID}] ${m.NOMBRE} - Nivel: ${m.NIVEL}</p>`).join('')}
-        </div>
+        <div id="mensajeMateria"></div>
     `;
 
     document.getElementById("formMateria").addEventListener("submit", function (e) {
@@ -58,8 +45,20 @@ function renderMateriasForm(contentBox, materias) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevaMateria)
         })
-        .then(res => res.json())
-        .then(() => showMaterias(contentBox))
-        .catch(error => console.error("Error al agregar materia:", error));
+        .then(res => {
+            if (res.ok) {
+                return res.json();
+            } else {
+                throw new Error("Error al agregar materia");
+            }
+        })
+        .then(() => {
+            document.getElementById("mensajeMateria").innerHTML = `<p class="text-green-600">Materia agregada exitosamente.</p>`;
+            document.getElementById("formMateria").reset();
+        })
+        .catch(error => {
+            console.error("Error al agregar materia:", error);
+            document.getElementById("mensajeMateria").innerHTML = `<p class="text-red-600">No se pudo agregar la materia.</p>`;
+        });
     });
 }
