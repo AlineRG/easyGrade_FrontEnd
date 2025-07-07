@@ -15,21 +15,11 @@ export function showMaterias(contentBox) {
             
             if (!responseRegistros.ok) throw new Error("Error al obtener registros");
             
-            const registros = await responseRegistros.json();
-            if (registros.length === 0) return [];
+            const materias = await responseRegistros.json();
+            if (materias.length === 0) return [];
             
-            // Luego obtenemos los detalles de cada materia
-            const materias = await Promise.all(
-                registros.map(async registro => {
-                    const responseMateria = await fetch(
-                        `http://127.0.0.1:8000/materias/${registro.MATERIA_ID}`
-                    );
-                    if (!responseMateria.ok) return null;
-                    return await responseMateria.json();
-                })
-            );
             
-            return materias.filter(m => m !== null);
+            return materias;
             
         } catch (error) {
             console.error("Error al cargar materias:", error);
@@ -186,7 +176,7 @@ export function showMaterias(contentBox) {
         const nivel = document.getElementById("nivelMateria").value.trim();
 
         try {
-            // 1. Primero agregamos la materia
+            // Agregar la materia
             const responseMateria = await fetch("http://127.0.0.1:8000/agregarMateria", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -200,7 +190,7 @@ export function showMaterias(contentBox) {
 
             const nuevaMateria = await responseMateria.json();
             
-            // 2. Luego creamos la relación usuario-materia
+            // Crear la relación usuario-materia
             const responseRegistro = await fetch("http://127.0.0.1:8000/updateRegistroMateriasUsuario", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
