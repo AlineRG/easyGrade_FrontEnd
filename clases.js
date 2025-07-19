@@ -27,7 +27,7 @@ export function showMaterias(contentBox) {
         }
     }
 
-    // Función para renderizar la lista de materias
+    // Función para renderizar la lista de materias y HTML
     async function renderMateriasList() {
         const materias = await cargarMaterias();
         const lista = materias.map(materia => `
