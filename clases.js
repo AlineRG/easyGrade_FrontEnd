@@ -135,34 +135,34 @@ export function showMaterias(contentBox) {
 
     // Estructura HTML inicial
     contentBox.innerHTML = `
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold mb-6">Mis Materias</h2>
-            
-            <form id="formMateria" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
-                <h3 class="text-lg font-semibold">Agregar nueva materia</h3>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                    <input type="text" id="nombreMateria" 
-                           class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-                    <input type="text" id="nivelMateria" 
-                           class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <button type="submit" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
-                    Agregar Materia
-                </button>
-            </form>
-            
-            <div id="mensajeMateria" class="mb-4"></div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
-                <div id="listaMaterias" class="space-y-4"></div>
-            </div>
+       <div class="w-full ml-8">
+    <h2 class="text-2xl font-bold mb-6">Mis Materias</h2>
+    
+    <form id="formMateria" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
+        <h3 class="text-lg font-semibold">Agregar nueva materia</h3>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <input type="text" id="nombreMateria" 
+                   class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
         </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
+            <input type="text" id="nivelMateria" 
+                   class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <button type="submit" 
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+            Agregar Materia
+        </button>
+    </form>
+    
+    <div id="mensajeMateria" class="mb-4"></div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
+        <div id="listaMaterias" class="space-y-4"></div>
+    </div>
+</div>
     `;
 
     // Cargar materias al iniciar
