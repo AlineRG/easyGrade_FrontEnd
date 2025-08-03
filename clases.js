@@ -142,7 +142,7 @@ export function showMaterias(contentBox) {
         </select>`;
 
     contentBox.innerHTML = `
-        <div class="w-full ml-8">
+        <div>
             <h2 class="text-2xl font-bold mb-6">Mis Materias</h2>
             
             <form id="formMateria" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
