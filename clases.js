@@ -5,6 +5,11 @@ export function showMaterias(contentBox) {
         return;
     }
 
+    const opcionesMaterias = {
+        nombres: ["Matemáticas", "Ciencias", "Historia", "Inglés"],
+        niveles: ["Básico", "Intermedio", "Avanzado"]
+    };
+
     async function cargarMaterias() {
         try {
             const responseRegistros = await fetch(
@@ -27,13 +32,19 @@ export function showMaterias(contentBox) {
                 <div class="flex flex-wrap gap-4 items-end">
                     <div class="flex-1 min-w-[200px]">
                         <label class="block font-semibold mb-1">Nombre:</label>
-                        <input type="text" value="${materia.NOMBRE || ''}" 
-                               class="nombre-input w-full p-2 border rounded" disabled />
+                        <select class="nombre-input w-full p-2 border rounded" disabled>
+                            ${opcionesMaterias.nombres.map(nombre =>
+                                `<option value="${nombre}" ${nombre === materia.NOMBRE ? "selected" : ""}>${nombre}</option>`
+                            ).join("")}
+                        </select>
                     </div>
                     <div class="flex-1 min-w-[150px]">
                         <label class="block font-semibold mb-1">Nivel:</label>
-                        <input type="text" value="${materia.NIVEL || ''}" 
-                               class="nivel-input w-full p-2 border rounded" disabled />
+                        <select class="nivel-input w-full p-2 border rounded" disabled>
+                            ${opcionesMaterias.niveles.map(nivel =>
+                                `<option value="${nivel}" ${nivel === materia.NIVEL ? "selected" : ""}>${nivel}</option>`
+                            ).join("")}
+                        </select>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
@@ -50,7 +61,7 @@ export function showMaterias(contentBox) {
             </form>
         `).join("");
 
-        document.getElementById("listaMaterias").innerHTML = lista || 
+        document.getElementById("listaMaterias").innerHTML = lista ||
             '<p class="text-gray-500">No tienes materias registradas.</p>';
 
         configurarEventos();
@@ -120,6 +131,16 @@ export function showMaterias(contentBox) {
         setTimeout(() => mensajeDiv.innerHTML = '', 3000);
     }
 
+    // Crea los selects dinámicos para agregar nueva materia
+    const selectNombre = `
+        <select id="nombreMateria" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+            ${opcionesMaterias.nombres.map(n => `<option value="${n}">${n}</option>`).join("")}
+        </select>`;
+    const selectNivel = `
+        <select id="nivelMateria" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+            ${opcionesMaterias.niveles.map(n => `<option value="${n}">${n}</option>`).join("")}
+        </select>`;
+
     contentBox.innerHTML = `
         <div class="w-full ml-8">
             <h2 class="text-2xl font-bold mb-6">Mis Materias</h2>
@@ -128,13 +149,11 @@ export function showMaterias(contentBox) {
                 <h3 class="text-lg font-semibold">Agregar nueva materia</h3>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                    <input type="text" id="nombreMateria" 
-                           class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                    ${selectNombre}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-                    <input type="text" id="nivelMateria" 
-                           class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                    ${selectNivel}
                 </div>
                 <button type="submit" 
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
@@ -165,7 +184,10 @@ export function showMaterias(contentBox) {
                 body: JSON.stringify({ NOMBRE: nombre, NIVEL: nivel })
             });
 
-            if (!responseMateria.ok) throw new Error("Error al agregar materia");
+            if (!responseMateria.ok) {
+                const errorMessage = await responseMateria.json();
+                throw new Error(errorMessage.detail);
+            }
 
             const nuevaMateria = await responseMateria.json();
 
@@ -185,7 +207,8 @@ export function showMaterias(contentBox) {
             await renderMateriasList();
         } catch (error) {
             console.error("Error:", error);
-            mostrarMensaje("Error al agregar la materia", "error");
+            mostrarMensaje(error.message, "error");
         }
     });
 }
+
