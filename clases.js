@@ -5,11 +5,6 @@ export function showMaterias(contentBox) {
         return;
     }
 
-    const opcionesMaterias = {
-        nombres: ["Matemáticas", "Ciencias", "Historia", "Inglés"],
-        niveles: ["Básico", "Intermedio", "Avanzado"]
-    };
-
     async function cargarMaterias() {
         try {
             const responseRegistros = await fetch(
@@ -32,19 +27,11 @@ export function showMaterias(contentBox) {
                 <div class="flex flex-wrap gap-4 items-end">
                     <div class="flex-1 min-w-[200px]">
                         <label class="block font-semibold mb-1">Nombre:</label>
-                        <select class="nombre-input w-full p-2 border rounded" disabled>
-                            ${opcionesMaterias.nombres.map(nombre =>
-                                `<option value="${nombre}" ${nombre === materia.NOMBRE ? "selected" : ""}>${nombre}</option>`
-                            ).join("")}
-                        </select>
+                        <input type="text" class="nombre-input w-full p-2 border rounded" value="${materia.NOMBRE}" disabled>
                     </div>
                     <div class="flex-1 min-w-[150px]">
                         <label class="block font-semibold mb-1">Nivel:</label>
-                        <select class="nivel-input w-full p-2 border rounded" disabled>
-                            ${opcionesMaterias.niveles.map(nivel =>
-                                `<option value="${nivel}" ${nivel === materia.NIVEL ? "selected" : ""}>${nivel}</option>`
-                            ).join("")}
-                        </select>
+                        <input type="text" class="nivel-input w-full p-2 border rounded" value="${materia.NIVEL}" disabled>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
@@ -56,6 +43,9 @@ export function showMaterias(contentBox) {
                     </button>
                     <button type="button" class="cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded hidden">
                         Cancelar
+                    </button>
+                    <button type="button" class="delete-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded hidden">
+                        Eliminar
                     </button>
                 </div>
             </form>
@@ -75,6 +65,7 @@ export function showMaterias(contentBox) {
                 form.querySelector(".nivel-input").disabled = false;
                 form.querySelector(".save-btn").classList.remove("hidden");
                 form.querySelector(".cancel-btn").classList.remove("hidden");
+                form.querySelector(".delete-btn").classList.remove("hidden");
                 e.target.classList.add("hidden");
             });
         });
@@ -111,6 +102,29 @@ export function showMaterias(contentBox) {
                 }
             });
         });
+
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const form = e.target.closest("form");
+                const materiaId = form.getAttribute("data-id");
+
+                if (!confirm("¿Estás seguro que quieres eliminar esta materia?")) return;
+
+                try {
+                    const response = await fetch(`http://127.0.0.1:8000/eliminarMateria/${materiaId}`, {
+                        method: "DELETE"
+                    });
+
+                    if (!response.ok) throw new Error("Error al eliminar la materia");
+
+                    mostrarMensaje("Materia eliminada correctamente", "success");
+                    await renderMateriasList();
+                } catch (error) {
+                    console.error("Error:", error);
+                    mostrarMensaje("Error al eliminar la materia", "error");
+                }
+            });
+        });
     }
 
     function resetForm(form) {
@@ -118,6 +132,7 @@ export function showMaterias(contentBox) {
         form.querySelector(".nivel-input").disabled = true;
         form.querySelector(".save-btn").classList.add("hidden");
         form.querySelector(".cancel-btn").classList.add("hidden");
+        form.querySelector(".delete-btn").classList.add("hidden");
         form.querySelector(".edit-btn").classList.remove("hidden");
     }
 
@@ -131,84 +146,81 @@ export function showMaterias(contentBox) {
         setTimeout(() => mensajeDiv.innerHTML = '', 3000);
     }
 
-    // Crea los selects dinámicos para agregar nueva materia
-    const selectNombre = `
-        <select id="nombreMateria" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
-            ${opcionesMaterias.nombres.map(n => `<option value="${n}">${n}</option>`).join("")}
-        </select>`;
-    const selectNivel = `
-        <select id="nivelMateria" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
-            ${opcionesMaterias.niveles.map(n => `<option value="${n}">${n}</option>`).join("")}
-        </select>`;
-
-    contentBox.innerHTML = `
-        <div>
-            <h2 class="text-2xl font-bold mb-6">Mis Materias</h2>
-            
-            <form id="formMateria" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
-                <h3 class="text-lg font-semibold">Agregar nueva materia</h3>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                    ${selectNombre}
+    async function init() {
+        contentBox.innerHTML = `
+            <div>
+                <h2 class="text-2xl font-bold mb-6">Mis Materias</h2>
+                
+                <form id="formMateria" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
+                    <h3 class="text-lg font-semibold">Agregar nueva materia</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <input type="text" id="nombreMateria" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
+                        <input type="text" id="nivelMateria" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <button type="submit" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                        Agregar Materia
+                    </button>
+                </form>
+                
+                <div id="mensajeMateria" class="mb-4"></div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
+                    <div id="listaMaterias" class="space-y-4"></div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-                    ${selectNivel}
-                </div>
-                <button type="submit" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
-                    Agregar Materia
-                </button>
-            </form>
-            
-            <div id="mensajeMateria" class="mb-4"></div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
-                <div id="listaMaterias" class="space-y-4"></div>
             </div>
-        </div>
-    `;
+        `;
 
-    renderMateriasList();
+        renderMateriasList();
 
-    document.getElementById("formMateria").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const nombre = document.getElementById("nombreMateria").value.trim();
-        const nivel = document.getElementById("nivelMateria").value.trim();
+        document.getElementById("formMateria").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById("nombreMateria").value.trim();
+            const nivel = document.getElementById("nivelMateria").value.trim();
 
-        try {
-            const responseMateria = await fetch("http://127.0.0.1:8000/agregarMateria", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ NOMBRE: nombre, NIVEL: nivel })
-            });
+            try {
+                const responseMateria = await fetch("http://127.0.0.1:8000/agregarMateria", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ NOMBRE: nombre, NIVEL: nivel })
+                });
 
-            if (!responseMateria.ok) {
-                const errorMessage = await responseMateria.json();
-                throw new Error(errorMessage.detail);
+                if (!responseMateria.ok) {
+                    const errorMessage = await responseMateria.json();
+                    throw new Error(errorMessage.detail);
+                }
+
+                const nuevaMateria = await responseMateria.json();
+
+                const responseRegistro = await fetch("http://127.0.0.1:8000/updateRegistroMateriasUsuario", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        USER_ID: userData.USER_ID,
+                        MATERIA_ID: nuevaMateria.MATERIA_ID
+                    })
+                });
+
+                if (!responseRegistro.ok) throw new Error("Error al registrar relación");
+
+                mostrarMensaje("Materia agregada correctamente", "success");
+                document.getElementById("formMateria").reset();
+                await renderMateriasList();
+            } catch (error) {
+                console.error("Error:", error);
+                mostrarMensaje(error.message, "error");
             }
+        });
+    }
 
-            const nuevaMateria = await responseMateria.json();
-
-            const responseRegistro = await fetch("http://127.0.0.1:8000/updateRegistroMateriasUsuario", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    USER_ID: userData.USER_ID,
-                    MATERIA_ID: nuevaMateria.MATERIA_ID
-                })
-            });
-
-            if (!responseRegistro.ok) throw new Error("Error al registrar relación");
-
-            mostrarMensaje("Materia agregada correctamente", "success");
-            document.getElementById("formMateria").reset();
-            await renderMateriasList();
-        } catch (error) {
-            console.error("Error:", error);
-            mostrarMensaje(error.message, "error");
-        }
-    });
+    init();
 }
+
+
+
 
