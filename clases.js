@@ -5,20 +5,9 @@ export function showMaterias(contentBox) {
         return;
     }
 
-    //Cargar materias del usuario
-    async function cargarMaterias() {
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/getMateriasByUserID?user_id=${userData.USER_ID}`);
-            if (!response.ok) throw new Error("Error al obtener registros");
-            const materias = await response.json();
-            return materias.length ? materias : [];
-        } catch (error) {
-            console.error("Error al cargar materias:", error);
-            return [];
-        }
-    }
+    let todasMaterias = []; // Array global para manejar materias y niveles
 
-    //Cargar todas las materias disponibles
+    //Cargar todas las materias registradas
     async function cargarTodasMaterias() {
         try {
             const response = await fetch("http://127.0.0.1:8000/todasMaterias");
@@ -30,10 +19,23 @@ export function showMaterias(contentBox) {
         }
     }
 
-    //Renderizar la lista de materias del usuario
+    //Cargar materias del usuario
+    async function cargarMateriasUsuario() {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/getMateriasByUserID?user_id=${userData.USER_ID}`);
+            if (!response.ok) throw new Error("Error al obtener materias del usuario");
+            const materias = await response.json();
+            return materias.length ? materias : [];
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+    }
+
+    //Renderizar lista de materias del usuario
     async function renderMateriasList() {
-        const materias = await cargarMaterias();
-        const lista = materias.map(materia => `
+        const materiasUsuario = await cargarMateriasUsuario();
+        const lista = materiasUsuario.map(materia => `
             <form class="bg-white border rounded p-4 space-y-4 mb-4" data-id="${materia.MATERIA_ID}">
                 <div class="flex flex-wrap gap-4 items-end">
                     <div class="flex-1 min-w-[200px]">
@@ -58,10 +60,10 @@ export function showMaterias(contentBox) {
         configurarEventos();
     }
 
-    //Configurar botones de edición, cancelación y eliminación
+    //Configurar botones de edición y eliminación
     function configurarEventos() {
         document.querySelectorAll(".edit-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
+            btn.addEventListener("click", e => {
                 const form = e.target.closest("form");
                 form.querySelector(".nombre-input").disabled = false;
                 form.querySelector(".nivel-input").disabled = false;
@@ -73,18 +75,15 @@ export function showMaterias(contentBox) {
         });
 
         document.querySelectorAll(".cancel-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                resetForm(e.target.closest("form"));
-            });
+            btn.addEventListener("click", e => resetForm(e.target.closest("form")));
         });
 
         document.querySelectorAll(".save-btn").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
+            btn.addEventListener("click", async e => {
                 const form = e.target.closest("form");
                 const materiaId = form.getAttribute("data-id");
                 const nombre = form.querySelector(".nombre-input").value.trim();
                 const nivel = form.querySelector(".nivel-input").value.trim();
-
                 try {
                     const response = await fetch(`http://127.0.0.1:8000/editarMateria/${materiaId}`, {
                         method: "PUT",
@@ -103,21 +102,17 @@ export function showMaterias(contentBox) {
         });
 
         document.querySelectorAll(".delete-btn").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
+            btn.addEventListener("click", async e => {
                 const form = e.target.closest("form");
                 const materiaId = form.getAttribute("data-id");
-
                 if (!confirm("¿Estás seguro que quieres eliminar esta materia?")) return;
-
                 try {
-                    const response = await fetch(`http://127.0.0.1:8000/eliminarMateria/${materiaId}`, {
-                        method: "DELETE"
-                    });
+                    const response = await fetch(`http://127.0.0.1:8000/eliminarMateria/${materiaId}`, { method: "DELETE" });
                     if (!response.ok) throw new Error("Error al eliminar la materia");
                     mostrarMensaje("Materia eliminada correctamente", "success");
                     await renderMateriasList();
                 } catch (error) {
-                    console.error("Error:", error);
+                    console.error(error);
                     mostrarMensaje("Error al eliminar la materia", "error");
                 }
             });
@@ -139,7 +134,28 @@ export function showMaterias(contentBox) {
         setTimeout(() => mensajeDiv.innerHTML = '', 3000);
     }
 
-    //Agregar materia desde dropdown (Recuadro 1)
+    // Actualizar dropdown del Recuadro 1
+    function actualizarDropdownMaterias() {
+        const materiasUnicas = [...new Set(todasMaterias.map(m => m.NOMBRE))];
+        document.getElementById("nombreMateria1").innerHTML = `<option value="">Selecciona una materia</option>` +
+            materiasUnicas.map(nombre => `<option value="${nombre}">${nombre}</option>`).join("");
+        document.getElementById("nivelMateria1").innerHTML = `<option value="">Selecciona un nivel</option>`;
+    }
+
+    //Cambiar opciones de nivel según materia seleccionada en Recuadro 1
+    document.addEventListener("change", e => {
+        if (e.target.id === "nombreMateria1") {
+            const materiaSeleccionada = e.target.value;
+            const nivelesDisponibles = todasMaterias
+                .filter(m => m.NOMBRE === materiaSeleccionada)
+                .map(m => m.NIVEL);
+            const nivelesUnicos = [...new Set(nivelesDisponibles)];
+            document.getElementById("nivelMateria1").innerHTML = `<option value="">Selecciona un nivel</option>` +
+                nivelesUnicos.map(n => `<option value="${n}">${n}</option>`).join("");
+        }
+    });
+
+    //Agregar materia al usuario (Recuadro 1)
     async function agregarMateriaPorId(materiaId, nivel) {
         try {
             const response = await fetch("http://127.0.0.1:8000/updateRegistroMateriasUsuario", {
@@ -157,70 +173,46 @@ export function showMaterias(contentBox) {
     }
 
     //Registrar nueva materia (Recuadro 2)
-    async function registrarMateria(nombre, nivel) {
+    async function agregarMateria(nombre, nivel) {
         try {
             const response = await fetch("http://127.0.0.1:8000/registrarMateria", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ NOMBRE: nombre, NIVEL: nivel })
             });
-            if (!response.ok) {
-                const errorMessage = await response.json();
-                throw new Error(errorMessage.detail);
-            }
+            if (!response.ok) throw new Error("Error al registrar materia");
             const nuevaMateria = await response.json();
-
-            // Relacionar con el usuario
-            await fetch("http://127.0.0.1:8000/updateRegistroMateriasUsuario", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ USER_ID: userData.USER_ID, MATERIA_ID: nuevaMateria.MATERIA_ID, NIVEL: nivel })
-            });
-
-            mostrarMensaje("Materia registrada correctamente", "success");
-
-            // Actualizar dropdown y lista
-            await initDropdown();
+            todasMaterias.push(nuevaMateria);
+            actualizarDropdownMaterias();
+            mostrarMensaje("Materia agregada correctamente", "success");
             await renderMateriasList();
-
         } catch (error) {
             console.error(error);
             mostrarMensaje(error.message, "error");
         }
     }
 
-    //Inicializar dropdown de Recuadro 1
-    async function initDropdown() {
-        const todasMaterias = await cargarTodasMaterias();
-        const opcionesHTML = todasMaterias.map(m => `<option value="${m.MATERIA_ID}">${m.NOMBRE}</option>`).join("");
-        document.getElementById("nombreMateria1").innerHTML = `
-            <option value="">Selecciona una materia</option>
-            ${opcionesHTML}
-        `;
-    }
-
-    //Inicialización de la interfaz
+    //Agrega Materias a la base de datos
     async function init() {
+        todasMaterias = await cargarTodasMaterias();
+
         contentBox.innerHTML = `
             <div>
                 <h2 class="text-2xl font-bold mb-6">Agrega Materias a la base de datos</h2>
-                
+
                 <!-- RECUADRO 1 -->
                 <form id="formMateria1" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
                     <h3 class="text-lg font-semibold">Agregar materia a mis materias</h3>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Materia</label>
                         <select id="nombreMateria1" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500">
-                            <option value="">Cargando materias...</option>
+                            <option value="">Selecciona una materia</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
                         <select id="nivelMateria1" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500">
                             <option value="">Selecciona un nivel</option>
-                            <option value="Básico">Básico</option>
-                            <option value="Intermedio">Intermedio</option>
-                            <option value="Avanzado">Avanzado</option>
                         </select>
                     </div>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">Agregar Materia</button>
@@ -235,12 +227,18 @@ export function showMaterias(contentBox) {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
-                        <input type="text" id="nivelMateria2" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                        <select id="nivelMateria2" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Selecciona un nivel</option>
+                            <option value="Básico">Básico</option>
+                            <option value="Intermedio">Intermedio</option>
+                            <option value="Avanzado">Avanzado</option>
+                        </select>
                     </div>
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">Registrar Materia</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">Agregar Materia</button>
                 </form>
 
                 <div id="mensajeMateria" class="mb-4"></div>
+
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
                     <div id="listaMaterias" class="space-y-4"></div>
@@ -248,28 +246,37 @@ export function showMaterias(contentBox) {
             </div>
         `;
 
-        await initDropdown();
+        actualizarDropdownMaterias();
         await renderMateriasList();
 
-        // Evento Recuadro 1
-        document.getElementById("formMateria1").addEventListener("submit", async (e) => {
+        //Recuadro 1
+        document.getElementById("formMateria1").addEventListener("submit", async e => {
             e.preventDefault();
-            const materiaId = document.getElementById("nombreMateria1").value;
-            const nivel = document.getElementById("nivelMateria1").value;
-            if (!materiaId || !nivel) {
+            const nombreMateria = document.getElementById("nombreMateria1").value;
+            const nivelMateria = document.getElementById("nivelMateria1").value;
+            if (!nombreMateria || !nivelMateria) {
                 mostrarMensaje("Selecciona materia y nivel", "error");
                 return;
             }
-            await agregarMateriaPorId(materiaId, nivel);
+            const materiaSeleccionada = todasMaterias.find(m => m.NOMBRE === nombreMateria && m.NIVEL === nivelMateria);
+            if (!materiaSeleccionada) {
+                mostrarMensaje("Materia no encontrada", "error");
+                return;
+            }
+            await agregarMateriaPorId(materiaSeleccionada.MATERIA_ID, nivelMateria);
             document.getElementById("formMateria1").reset();
         });
 
-        // Evento Recuadro 2
-        document.getElementById("formMateria2").addEventListener("submit", async (e) => {
+        // Eventos Recuadro 2
+        document.getElementById("formMateria2").addEventListener("submit", async e => {
             e.preventDefault();
             const nombre = document.getElementById("nombreMateria2").value.trim();
             const nivel = document.getElementById("nivelMateria2").value.trim();
-            await registrarMateria(nombre, nivel);
+            if (!nombre || !nivel) {
+                mostrarMensaje("Ingresa nombre y nivel de la materia", "error");
+                return;
+            }
+            await agregarMateria(nombre, nivel);
             document.getElementById("formMateria2").reset();
         });
     }
