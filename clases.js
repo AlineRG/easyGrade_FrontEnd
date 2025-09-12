@@ -198,7 +198,7 @@ export function showMaterias(contentBox) {
 
         contentBox.innerHTML = `
             <div>
-                <h2 class="text-2xl font-bold mb-6">Agrega Materias a la base de datos</h2>
+                <h2 class="text-2xl font-bold mb-6">Agrega a mis materias</h2>
 
                 <!-- RECUADRO 1 -->
                 <form id="formMateria1" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
@@ -216,9 +216,20 @@ export function showMaterias(contentBox) {
                         </select>
                     </div>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">Agregar Materia</button>
-                </form>
+                <div id="mensajeMateria" class="mb-4"></div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
+                    <div id="listaMaterias" class="space-y-4"></div>
+                </div>
+                    </form>
 
                 <!-- RECUADRO 2 -->
+                <div>
+
+                <h2 class="text-2xl font-bold mb-6">Registrar nueva materia en la base de datos</h2>
+                </div>
+
                 <form id="formMateria2" class="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
                     <h3 class="text-lg font-semibold">Registrar nueva materia</h3>
                     <div>
@@ -237,12 +248,7 @@ export function showMaterias(contentBox) {
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">Agregar Materia</button>
                 </form>
 
-                <div id="mensajeMateria" class="mb-4"></div>
-
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Lista de materias</h3>
-                    <div id="listaMaterias" class="space-y-4"></div>
-                </div>
+                
             </div>
         `;
 
